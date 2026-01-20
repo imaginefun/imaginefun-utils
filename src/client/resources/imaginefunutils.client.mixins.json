@@ -1,8 +1,12 @@
 {
 	"required": true,
-	"package": "net.imaginefun.mixin.client",
+	"package": "net.imaginefun.mixins.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"RenderTypeAccessor",
+		"RenderSetupAccessor",
+		"TextureBindingAccessor",
+		"SkullBlockRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
