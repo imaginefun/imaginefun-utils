@@ -27,12 +27,12 @@ import net.minecraft.core.Direction;
 public abstract class SkullBlockRendererMixin {
     @Unique
     private static Identifier getTextureLocation(RenderSetup renderSetup, String textureKey) {
-        Map<String, ?> textures = ((RenderSetupAccessor) (Object) renderSetup).getTextures();
+        Map<String, ?> textures = ((RenderSetupAccessor) (Object) renderSetup).imaginefunutils$getTextures();
         Object textureBinding = textures.get(textureKey);
         if (textureBinding == null) {
             return null;
         }
-        
+
         return ((TextureBindingAccessor) textureBinding).invokeLocation();
     }
     

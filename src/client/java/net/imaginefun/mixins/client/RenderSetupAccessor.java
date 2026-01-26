@@ -10,5 +10,5 @@ import net.minecraft.client.renderer.rendertype.RenderSetup;
 @Mixin(RenderSetup.class)
 public interface RenderSetupAccessor {
     @Accessor("textures")
-    Map<String, ?> getTextures();
+    Map<String, ?> imaginefunutils$getTextures();
 }
