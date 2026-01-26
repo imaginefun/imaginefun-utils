@@ -1,0 +1,4 @@
+accessWidener v2 named
+
+accessible class net/minecraft/client/renderer/debug/GameTestBlockHighlightRenderer$Marker
+accessible class net/minecraft/client/renderer/rendertype/RenderSetup$TextureBinding

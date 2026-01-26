@@ -21,6 +21,7 @@
 			"net.imaginefun.ImagineFunUtilsClient"
 		]
 	},
+	"accessWidener": "imaginefunutils.accesswidener",
 	"mixins": [
 		"imaginefunutils.mixins.json",
 		{
