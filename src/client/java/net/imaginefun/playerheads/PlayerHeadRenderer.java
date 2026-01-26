@@ -36,11 +36,19 @@ public class PlayerHeadRenderer {
     
     public static boolean render(
         Identifier skinTexture,
-        PoseStack matrixStack, 
+        PoseStack matrixStack,
         Direction direction,
         int light,
         float yaw
     ) {
+        try {
+            if (net.irisshaders.iris.api.v0.IrisApi.getInstance().isRenderingShadowPass()) {
+                return false;
+            }
+        } catch (NoClassDefFoundError e) {
+            // Iris not installed, continue normally
+        }
+
         AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(skinTexture);
 
         NativeImage image = null;
