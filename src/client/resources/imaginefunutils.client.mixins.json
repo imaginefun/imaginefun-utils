@@ -6,8 +6,10 @@
 		"RenderTypeAccessor",
 		"RenderSetupAccessor",
 		"TextureBindingAccessor",
+		"ScreenAccessor",
 		"SkullBlockRendererMixin",
-		"GameTestBlockHighlightRendererMixin"
+		"GameTestBlockHighlightRendererMixin",
+		"TitleScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
