@@ -3,14 +3,15 @@
 	"package": "net.imaginefun.mixins.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"RenderTypeAccessor",
-		"RenderSetupAccessor",
-		"TextureBindingAccessor",
-		"ScreenAccessor",
-		"SkullBlockRendererMixin",
-		"GameTestBlockHighlightRendererMixin",
-		"TitleScreenMixin"
-	],
+      "ClientPacketListenerMixin",
+      "GameTestBlockHighlightRendererMixin",
+      "RenderSetupAccessor",
+      "RenderTypeAccessor",
+      "ScreenAccessor",
+      "SkullBlockRendererMixin",
+      "TextureBindingAccessor",
+      "TitleScreenMixin"
+    ],
 	"injectors": {
 		"defaultRequire": 1
 	}

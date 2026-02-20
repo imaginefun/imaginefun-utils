@@ -3,7 +3,7 @@ package net.imaginefun;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.imaginefun.networking.GameTestAddMarkerPayload;
-
+import net.imaginefun.networking.HandshakePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,5 +18,6 @@ public class ImagineFunUtils implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		PayloadTypeRegistry.playS2C().register(GameTestAddMarkerPayload.TYPE, GameTestAddMarkerPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 	}
 }
