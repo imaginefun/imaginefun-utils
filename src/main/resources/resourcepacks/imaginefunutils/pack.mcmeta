@@ -1,0 +1,12 @@
+{
+  "pack": {
+    "pack_format": 88,
+    "min_format": 46,
+    "max_format": 1995,
+    "supported_formats": {
+      "min_inclusive": 46,
+      "max_inclusive": 1995
+    },
+    "description": "ImagineFunUtils Integrated Resource Pack"
+  }
+}
