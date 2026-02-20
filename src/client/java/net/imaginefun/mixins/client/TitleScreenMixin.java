@@ -50,6 +50,7 @@ public abstract class TitleScreenMixin extends Screen {
                     ImaginefunUtilsConfig.serverAddress,
                     ServerData.Type.OTHER
                 );
+                serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
                 ServerAddress serverAddress = ServerAddress.parseString(ImaginefunUtilsConfig.serverAddress);
                 ConnectScreen.startConnecting((TitleScreen) (Object) this, minecraft, serverAddress, serverData, false, null);
             }
