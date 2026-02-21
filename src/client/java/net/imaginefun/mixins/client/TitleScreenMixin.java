@@ -1,11 +1,6 @@
 package net.imaginefun.mixins.client;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.imaginefun.config.ImaginefunUtilsConfig;
+import net.imaginefun.ImaginefunUtilsConstants;
 import net.imaginefun.gui.ImagineFunButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -16,6 +11,10 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
@@ -43,15 +42,15 @@ public abstract class TitleScreenMixin extends Screen {
 
         ImagineFunButton joinButton = new ImagineFunButton(
             x, y, buttonWidth, buttonHeight,
-            Component.literal("Join " + ImaginefunUtilsConfig.serverName),
+            Component.literal("Join " + ImaginefunUtilsConstants.serverName),
             button -> {
                 ServerData serverData = new ServerData(
-                    ImaginefunUtilsConfig.serverName,
-                    ImaginefunUtilsConfig.serverAddress,
+                    ImaginefunUtilsConstants.serverName,
+                    ImaginefunUtilsConstants.serverAddress,
                     ServerData.Type.OTHER
                 );
                 serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
-                ServerAddress serverAddress = ServerAddress.parseString(ImaginefunUtilsConfig.serverAddress);
+                ServerAddress serverAddress = ServerAddress.parseString(ImaginefunUtilsConstants.serverAddress);
                 ConnectScreen.startConnecting((TitleScreen) (Object) this, minecraft, serverAddress, serverData, false, null);
             }
         );

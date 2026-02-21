@@ -1,6 +1,6 @@
 package net.imaginefun.servers;
 
-import net.imaginefun.config.ImaginefunUtilsConfig;
+import net.imaginefun.ImaginefunUtilsConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
@@ -11,7 +11,7 @@ public class ServerListPopulator {
         var serverList = new ServerList(Minecraft.getInstance());
         serverList.load();
         if (serverList.size() == 0) {
-            var serverData = new ServerData(ImaginefunUtilsConfig.serverName, ImaginefunUtilsConfig.serverAddress, ServerData.Type.OTHER);
+            var serverData = new ServerData(ImaginefunUtilsConstants.serverName, ImaginefunUtilsConstants.serverAddress, ServerData.Type.OTHER);
             serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
             serverList.add(serverData, false);
             serverList.save();
