@@ -3,7 +3,6 @@
 	"package": "net.imaginefun.mixins.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-      "ClientPacketListenerMixin",
       "GameTestBlockHighlightRendererMixin",
       "RenderSetupAccessor",
       "RenderTypeAccessor",
