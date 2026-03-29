@@ -10,15 +10,12 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 
 public class PlayerHeadRenderer {
@@ -37,9 +34,7 @@ public class PlayerHeadRenderer {
     public static boolean render(
         Identifier skinTexture,
         PoseStack matrixStack,
-        Direction direction,
-        int light,
-        float yaw
+        int light
     ) {
         try {
             if (net.irisshaders.iris.api.v0.IrisApi.getInstance().isRenderingShadowPass()) {
@@ -75,7 +70,7 @@ public class PlayerHeadRenderer {
         int controlB = (controlPixel >> 0) & 0xFF;
         int controlA = (controlPixel >> 24) & 0xFF;
 
-        renderCustomSkull(direction, light, yaw, matrixStack, skinTexture,
+        renderCustomSkull(light, matrixStack, skinTexture,
             image,
             controlA,
             controlR,
@@ -135,9 +130,7 @@ public class PlayerHeadRenderer {
      * @param scale The scale factor for the skull (based on alpha channel of marker pixel)
      */
     public static void renderCustomSkull(
-        Direction direction,
         int light,
-        float yaw,
         PoseStack matrixStack,
         Identifier skinTexture,
         NativeImage image,
@@ -148,13 +141,9 @@ public class PlayerHeadRenderer {
     ) {
         matrixStack.pushPose();
 
-        if (direction == null) {
-            matrixStack.translate(0.5F, 0.0F, 0.5F);
-        } else {
-            matrixStack.translate(0.5F - direction.getStepX() * 0.25F, 0.25F, 0.5F - direction.getStepZ() * 0.25F);
-        }
-		matrixStack.scale(-1.1875F, -1.1875F, 1.1875F);
-        matrixStack.mulPose(Axis.YP.rotationDegrees(yaw));
+        // Position/rotation already applied via state.transformation
+        // Apply additional scale (from -1,-1,1 to -1.1875,-1.1875,1.1875) and offset
+        matrixStack.scale(1.1875F, 1.1875F, 1.1875F);
         matrixStack.translate(0.0F, -0.211F, -0.211F);
 
         int overlay = OverlayTexture.NO_OVERLAY;

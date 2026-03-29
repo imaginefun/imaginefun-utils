@@ -13,15 +13,12 @@ import net.imaginefun.playerheads.PlayerHeadRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.blockentity.state.SkullBlockRenderState;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
-
-import net.minecraft.core.Direction;
 
 @Mixin(SkullBlockRenderer.class)
 public abstract class SkullBlockRendererMixin {
@@ -35,31 +32,25 @@ public abstract class SkullBlockRendererMixin {
 
         return ((TextureBindingAccessor) textureBinding).invokeLocation();
     }
-    
+
     @Inject(
-        method = "submitSkull(Lnet/minecraft/core/Direction;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/model/object/skull/SkullModelBase;Lnet/minecraft/client/renderer/rendertype/RenderType;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
+        method = "submit(Lnet/minecraft/client/renderer/blockentity/state/SkullBlockRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
         at = @At("HEAD"),
         cancellable = true
     )
-    private static void onStaticRender(
-        Direction facing,
-        float yaw,
-        float poweredTicks,
-        PoseStack matrices,
-        SubmitNodeCollector queue,
-        int light,
-        SkullModelBase model,
-        RenderType renderLayer,
-        int outlineColor,
-        ModelFeatureRenderer.CrumblingOverlay crumblingOverlay,
+    private void onSubmit(
+        SkullBlockRenderState state,
+        PoseStack poseStack,
+        SubmitNodeCollector submitNodeCollector,
+        CameraRenderState camera,
         CallbackInfo ci
     ) {
-        if (renderLayer == null) {
+        if (state.renderType == null) {
             return;
         }
 
-        RenderTypeAccessor playerSkinCacheEntryAccessor = (RenderTypeAccessor) renderLayer;
-        RenderSetup renderSetup = playerSkinCacheEntryAccessor.getState();
+        RenderTypeAccessor renderTypeAccessor = (RenderTypeAccessor) state.renderType;
+        RenderSetup renderSetup = renderTypeAccessor.getState();
         if (renderSetup == null) {
             return;
         }
@@ -69,13 +60,16 @@ public abstract class SkullBlockRendererMixin {
             return;
         }
 
+        poseStack.pushPose();
+        poseStack.mulPose(state.transformation);
+
         boolean success = PlayerHeadRenderer.render(
             texture,
-            matrices,
-            facing,
-            light,
-            yaw
+            poseStack,
+            state.lightCoords
         );
+
+        poseStack.popPose();
 
         if (success) {
             ci.cancel();
