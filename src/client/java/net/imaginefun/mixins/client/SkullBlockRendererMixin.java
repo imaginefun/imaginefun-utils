@@ -3,9 +3,8 @@ package net.imaginefun.mixins.client;
 
 import java.util.Map;
 
-import org.joml.Matrix3f;
-import org.joml.Matrix4fc;
-import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.imaginefun.playerheads.PlayerHeadRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Transformation;
 
 import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -82,30 +82,25 @@ public abstract class SkullBlockRendererMixin {
             return;
         }
 
-        // Extract direction and yaw from state.transformation.
-        // The transformation matrix encodes: T * R_Y(-yaw) * S(-1,-1,1)
-        // where T is the direction-based translation and yaw is negated
-        // compared to 1.21.11's rotationDegrees. We negate extractYaw to match.
-        Matrix4fc M = state.transformation.getMatrix();
-        float tx = M.m30();
-        float ty = M.m31();
-
-        // Determine direction from translation:
-        // Ground skulls: ty == 0 -> direction = null
-        // Wall skulls: ty == 0.25 -> direction is non-null
+        // In 26.1, state.direction/rotationDegrees were replaced by state.transformation.
+        // Use Transformation's built-in decomposition to recover direction and yaw.
+        // The transformation is constructed as T * R_Y(-yaw) * S(-1,-1,1).
+        Transformation t = state.transformation;
+        Vector3fc translation = t.translation();
         Direction direction;
-        float yaw;
 
-        if (Math.abs(ty - 0.25F) < 0.01F) {
-            // Wall skull — determine direction from translation offsets
-            float tz = M.m32();
-            direction = imaginefunutils$directionFromTranslation(tx, tz);
-            yaw = -imaginefunutils$extractYaw(M);
+        if (Math.abs(translation.y() - 0.25F) < 0.01F) {
+            // Wall skull — direction from translation offsets
+            direction = imaginefunutils$directionFromTranslation(translation.x(), translation.z());
         } else {
-            // Ground skull — direction is null
+            // Ground skull
             direction = null;
-            yaw = -imaginefunutils$extractYaw(M);
         }
+
+        // leftRotation is Axis.YP.rotationDegrees(-yaw), i.e. quaternion (0, sin(-yaw/2), 0, cos(-yaw/2)).
+        // Extract yaw: for a pure Y-rotation quaternion, angle = 2*atan2(q.y, q.w), negate to undo the sign.
+        Quaternionfc q = t.leftRotation();
+        float yaw = -(float) Math.toDegrees(2.0 * Math.atan2(q.y(), q.w()));
 
         boolean success = PlayerHeadRenderer.render(
             texture,
@@ -192,25 +187,6 @@ public abstract class SkullBlockRendererMixin {
             }
         }
         return false;
-    }
-
-    /**
-     * Extract the Y-axis rotation angle (yaw) from the transformation matrix.
-     * The 3x3 part is R_Y(yaw) * S(-1,-1,1). We undo S(-1,-1,1) to get
-     * pure R_Y, then extract the angle.
-     */
-    @Unique
-    private static float imaginefunutils$extractYaw(Matrix4fc M) {
-        // Get the 3x3 rotation+scale submatrix
-        Matrix3f rot = new Matrix3f(M);
-        // Undo S(-1,-1,1) by right-multiplying with S(-1,-1,1) (its own inverse)
-        rot.scale(-1, -1, 1);
-        // Now rot is pure R_Y(yaw). Extract yaw from atan2.
-        // R_Y = [[cos, 0, sin], [0, 1, 0], [-sin, 0, cos]]
-        // In JOML column-major: m00=cos, m20=sin, m02=-sin, m22=cos
-        float sin = rot.m20;
-        float cos = rot.m00;
-        return (float) Math.toDegrees(Math.atan2(sin, cos));
     }
 
     /**
