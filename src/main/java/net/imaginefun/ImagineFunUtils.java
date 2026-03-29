@@ -20,9 +20,9 @@ public class ImagineFunUtils implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		PayloadTypeRegistry.playS2C().register(GameTestAddMarkerPayload.TYPE, GameTestAddMarkerPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playS2C().register(PlayerForceLookPayload.TYPE, PlayerForceLookPayload.STREAM_CODEC);
-		PayloadTypeRegistry.playC2S().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(GameTestAddMarkerPayload.TYPE, GameTestAddMarkerPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(PlayerForceLookPayload.TYPE, PlayerForceLookPayload.STREAM_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 
 		FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(mod ->
             ResourceLoader.registerBuiltinPack(

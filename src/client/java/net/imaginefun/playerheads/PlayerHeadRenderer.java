@@ -184,7 +184,7 @@ public class PlayerHeadRenderer {
         float z = 0.0f;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderTypes.entityCutoutNoCull(actualIdentifier));
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderTypes.entityCutout(actualIdentifier));
 
         Matrix4f matrix4f = matrixStack.last().pose();
         Pose pose = matrixStack.last();
