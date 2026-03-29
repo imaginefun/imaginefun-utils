@@ -7,7 +7,7 @@
       "RenderSetupAccessor",
       "RenderTypeAccessor",
       "SkullBlockRendererMixin",
-"TextureBindingAccessor"
+      "TextureBindingAccessor"
     ],
 	"injectors": {
 		"defaultRequire": 1
