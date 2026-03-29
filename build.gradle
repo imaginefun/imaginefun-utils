@@ -44,6 +44,9 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	compileOnly "maven.modrinth:iris:${project.iris_version}"
+
+	implementation "com.h2database:h2:2.3.232"
+	include "com.h2database:h2:2.3.232"
 }
 
 processResources {

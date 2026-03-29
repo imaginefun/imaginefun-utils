@@ -12,14 +12,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.imaginefun.cache.TextureCache;
 import net.imaginefun.playerheads.PlayerHeadRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.Minecraft;
 
 import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.blockentity.state.SkullBlockRenderState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -116,8 +120,24 @@ public abstract class SkullBlockRendererMixin {
         );
 
         if (success) {
+            // Record which texture hash appears at this block position for preloading
+            imaginefunutils$recordTextureLocation(texture, state.blockPos);
             ci.cancel();
         }
+    }
+
+    @Unique
+    private static void imaginefunutils$recordTextureLocation(Identifier texture, BlockPos pos) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+
+        String path = texture.getPath();
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash < 0) return;
+        String hash = path.substring(lastSlash + 1);
+
+        String world = mc.level.dimension().identifier().toString();
+        TextureCache.recordLocationAsync(hash, world, pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     /**

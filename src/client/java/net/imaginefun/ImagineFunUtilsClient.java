@@ -1,10 +1,12 @@
 package net.imaginefun;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.imaginefun.cache.TextureCache;
+import net.imaginefun.cache.TexturePreloader;
 import net.imaginefun.networking.ClientCustomPacketListener;
 import net.imaginefun.networking.ClientCustomPacketListenerImpl;
 import net.imaginefun.networking.HandshakePayload;
@@ -27,6 +29,10 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 				.orElse("unknown");
 			ClientPlayNetworking.send(new HandshakePayload(version));
 		});
+
+		ClientTickEvents.END_CLIENT_TICK.register(TexturePreloader::tick);
+
+		Runtime.getRuntime().addShutdownHook(new Thread(TextureCache::close, "texture-cache-shutdown"));
 
 	}
 
