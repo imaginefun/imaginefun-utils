@@ -12,18 +12,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.imaginefun.cache.TextureCache;
 import net.imaginefun.playerheads.PlayerHeadRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.Minecraft;
 
 import net.minecraft.client.model.object.skull.SkullModelBase;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.blockentity.state.SkullBlockRenderState;
-import net.minecraft.core.BlockPos;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -87,8 +83,9 @@ public abstract class SkullBlockRendererMixin {
         }
 
         // Extract direction and yaw from state.transformation.
-        // The transformation matrix encodes: T * R_Y(yaw) * S(-1,-1,1)
-        // where T is the direction-based translation.
+        // The transformation matrix encodes: T * R_Y(-yaw) * S(-1,-1,1)
+        // where T is the direction-based translation and yaw is negated
+        // compared to 1.21.11's rotationDegrees. We negate extractYaw to match.
         Matrix4fc M = state.transformation.getMatrix();
         float tx = M.m30();
         float ty = M.m31();
@@ -103,12 +100,11 @@ public abstract class SkullBlockRendererMixin {
             // Wall skull — determine direction from translation offsets
             float tz = M.m32();
             direction = imaginefunutils$directionFromTranslation(tx, tz);
-            // Extract yaw: undo S(-1,-1,1) from the 3x3 to get pure rotation R_Y
-            yaw = imaginefunutils$extractYaw(M);
+            yaw = -imaginefunutils$extractYaw(M);
         } else {
             // Ground skull — direction is null
             direction = null;
-            yaw = imaginefunutils$extractYaw(M);
+            yaw = -imaginefunutils$extractYaw(M);
         }
 
         boolean success = PlayerHeadRenderer.render(
@@ -120,24 +116,8 @@ public abstract class SkullBlockRendererMixin {
         );
 
         if (success) {
-            // Record which texture hash appears at this block position for preloading
-            imaginefunutils$recordTextureLocation(texture, state.blockPos);
             ci.cancel();
         }
-    }
-
-    @Unique
-    private static void imaginefunutils$recordTextureLocation(Identifier texture, BlockPos pos) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
-
-        String path = texture.getPath();
-        int lastSlash = path.lastIndexOf('/');
-        if (lastSlash < 0) return;
-        String hash = path.substring(lastSlash + 1);
-
-        String world = mc.level.dimension().identifier().toString();
-        TextureCache.recordLocationAsync(hash, world, pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     /**
@@ -170,6 +150,22 @@ public abstract class SkullBlockRendererMixin {
             return;
         }
 
+        // In 26.1, CustomHeadLayer changed two things vs 1.21.11:
+        //   1. scale(1.1875, -1.1875, -1.1875) → scale(1.1875, 1.1875, 1.1875)
+        //   2. Removed the translate(-0.5, 0, -0.5) that followed the scale
+        // Additionally, 26.1's submitSkull no longer applies translate(0.5,0,0.5)
+        // + scale(-1,-1,1) internally (those were in 1.21.11's submitSkull).
+        //
+        // Our renderCustomSkull was designed for the 1.21.11 poseStack state, which
+        // had: scale(1.1875,-1.1875,-1.1875) * translate(-0.5,0,-0.5).
+        // We restore that here by flipping Y/Z and adding back the translate.
+        boolean fromCustomHeadLayer = imaginefunutils$isCalledFromCustomHeadLayer();
+        if (fromCustomHeadLayer) {
+            poseStack.pushPose();
+            poseStack.scale(1.0F, -1.0F, -1.0F);
+            poseStack.translate(-0.5F, 0.0F, -0.5F);
+        }
+
         // In 1.21.11, callers 2/3/4 always passed direction=null, yaw=180.0F
         boolean success = PlayerHeadRenderer.render(
             texture,
@@ -179,9 +175,23 @@ public abstract class SkullBlockRendererMixin {
             180.0F
         );
 
+        if (fromCustomHeadLayer) {
+            poseStack.popPose();
+        }
+
         if (success) {
             ci.cancel();
         }
+    }
+
+    @Unique
+    private static boolean imaginefunutils$isCalledFromCustomHeadLayer() {
+        for (StackTraceElement e : Thread.currentThread().getStackTrace()) {
+            if (e.getClassName().endsWith("CustomHeadLayer")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
