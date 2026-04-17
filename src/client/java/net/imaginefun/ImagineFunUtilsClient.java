@@ -8,6 +8,8 @@ import net.imaginefun.networking.ClientCustomPacketListener;
 import net.imaginefun.networking.ClientCustomPacketListenerImpl;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.servers.ServerListPopulator;
+import net.imaginefun.windowicon.DockIconHandler;
+import net.minecraft.client.multiplayer.ServerData;
 
 public class ImagineFunUtilsClient implements ClientModInitializer {
 
@@ -24,7 +26,15 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 				.map(mod -> mod.getMetadata().getVersion().getFriendlyString())
 				.orElse("unknown");
 			ClientPlayNetworking.send(new HandshakePayload(version));
+
+			ServerData server = client.getCurrentServer();
+			if (server != null && server.ip != null
+				&& server.ip.toLowerCase().endsWith(".imaginefun.net")) {
+				DockIconHandler.apply();
+			}
 		});
+
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> DockIconHandler.reset());
 
 	}
 
