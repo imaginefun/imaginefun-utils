@@ -20,9 +20,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 
 /**
- * Replaces the OS window icon (macOS Dock, Windows taskbar, Linux titlebar) with the
- * ImagineFun logo while connected to an ImagineFun server, and restores the vanilla
- * icon on disconnect.
+ * Replaces the OS window icon (macOS Dock, Windows taskbar) with the ImagineFun logo
+ * while connected to an ImagineFun server, and restores the vanilla icon on disconnect.
  *
  * <p>Two code paths because GLFW's {@code glfwSetWindowIcon} is documented as a no-op on
  * macOS — Cocoa requires {@code [NSApplication setApplicationIconImage:]} via the
@@ -36,15 +35,15 @@ public final class DockIconHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger("ImagineFunDockIcon");
     private static final String ICON_RESOURCE = "/assets/imaginefunutils/dock-icon.png";
 
-    private enum Os { MAC, WIN_OR_LINUX, OTHER }
+    private enum Os { MAC, WIN, OTHER }
 
     private static final Os OS;
     static {
         String os = System.getProperty("os.name", "").toLowerCase();
         if (os.contains("mac") || os.contains("darwin")) {
             OS = Os.MAC;
-        } else if (os.contains("win") || os.contains("linux")) {
-            OS = Os.WIN_OR_LINUX;
+        } else if (os.contains("win")) {
+            OS = Os.WIN;
         } else {
             OS = Os.OTHER;
         }
@@ -59,7 +58,7 @@ public final class DockIconHandler {
         if (applied) return;
         switch (OS) {
             case MAC -> applyMac();
-            case WIN_OR_LINUX -> applyGlfw();
+            case WIN -> applyGlfw();
             case OTHER -> {}
         }
     }
@@ -68,7 +67,7 @@ public final class DockIconHandler {
         if (!applied) return;
         switch (OS) {
             case MAC -> resetMac();
-            case WIN_OR_LINUX -> resetGlfw();
+            case WIN -> resetGlfw();
             case OTHER -> {}
         }
     }
