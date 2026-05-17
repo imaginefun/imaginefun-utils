@@ -28,9 +28,11 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 			ClientPlayNetworking.send(new HandshakePayload(version));
 
 			ServerData server = client.getCurrentServer();
-			if (server != null && server.ip != null
-				&& server.ip.toLowerCase().endsWith(".imaginefun.net")) {
-				DockIconHandler.apply();
+			if (server != null && server.ip != null) {
+				String host = server.ip.toLowerCase().split(":")[0];
+				if (host.endsWith(".imaginefun.net")) {
+					DockIconHandler.apply();
+				}
 			}
 		});
 
