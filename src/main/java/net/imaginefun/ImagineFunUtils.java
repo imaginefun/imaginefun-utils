@@ -5,9 +5,12 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.imaginefun.networking.ApiSessionPayload;
 import net.imaginefun.networking.GameTestAddMarkerPayload;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.networking.PlayerForceLookPayload;
+import net.imaginefun.networking.RideStatusPayload;
+import net.imaginefun.networking.ServerInfoPayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
@@ -22,6 +25,9 @@ public class ImagineFunUtils implements ModInitializer {
 	public void onInitialize() {
 		PayloadTypeRegistry.playS2C().register(GameTestAddMarkerPayload.TYPE, GameTestAddMarkerPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(PlayerForceLookPayload.TYPE, PlayerForceLookPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(ApiSessionPayload.TYPE, ApiSessionPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(RideStatusPayload.TYPE, RideStatusPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(ServerInfoPayload.TYPE, ServerInfoPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 
 		FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(mod ->
