@@ -7,6 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
+@Since("0.0.6")
 public record PlayerForceLookPayload(float deltaYaw, float deltaPitch) implements CustomPacketPayload {
 
     public static final Identifier ID = Identifier.fromNamespaceAndPath(ImagineFunUtils.MOD_ID, "player_force_look");

@@ -4,10 +4,13 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.imaginefun.command.WhoamiCommand;
 import net.imaginefun.networking.ClientCustomPacketListener;
 import net.imaginefun.networking.ClientCustomPacketListenerImpl;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.servers.ServerListPopulator;
+import net.imaginefun.session.ApiSession;
+import net.imaginefun.session.ServerSession;
 import net.imaginefun.windowicon.DockIconHandler;
 import net.minecraft.client.multiplayer.ServerData;
 
@@ -19,6 +22,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 	public void onInitializeClient() {
         clientCustomPacketListener = new ClientCustomPacketListenerImpl();
 		ServerListPopulator.populate();
+		WhoamiCommand.register();
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			String version = FabricLoader.getInstance()
@@ -36,8 +40,11 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 			}
 		});
 
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> DockIconHandler.reset());
-
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			DockIconHandler.reset();
+			ApiSession.clear();
+			ServerSession.clear();
+		});
 	}
 
     public ClientCustomPacketListener getClientCustomPacketListener() {

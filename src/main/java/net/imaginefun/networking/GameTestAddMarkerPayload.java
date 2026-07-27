@@ -8,6 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
+@Since("0.0.3")
 public record GameTestAddMarkerPayload(BlockPos pos, int color, String text, int duration) implements CustomPacketPayload {
 
     public static final Identifier ID = Identifier.fromNamespaceAndPath(ImagineFunUtils.MOD_ID, "game_test_add_marker");
