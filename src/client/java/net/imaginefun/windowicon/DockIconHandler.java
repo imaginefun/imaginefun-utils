@@ -50,7 +50,6 @@ public final class DockIconHandler {
     }
 
     private static boolean applied = false;
-    private static long savedMacIcon = 0;
 
     private DockIconHandler() {}
 
@@ -95,9 +94,6 @@ public final class DockIconHandler {
             long selSharedApp = ObjCRuntime.sel_registerName("sharedApplication");
             long app = JNI.invokePPP(nsAppClass, selSharedApp, msgSend);
 
-            long selGetIcon = ObjCRuntime.sel_registerName("applicationIconImage");
-            savedMacIcon = JNI.invokePPP(app, selGetIcon, msgSend);
-
             long nsDataClass = ObjCRuntime.objc_getClass("NSData");
             long selDataWithBytesLength = ObjCRuntime.sel_registerName("dataWithBytes:length:");
 
@@ -126,7 +122,12 @@ public final class DockIconHandler {
                 }
 
                 long selSetIcon = ObjCRuntime.sel_registerName("setApplicationIconImage:");
-                JNI.invokePPPV(app, selSetIcon, nsImage, msgSend);
+                long selRelease = ObjCRuntime.sel_registerName("release");
+                try {
+                    JNI.invokePPPV(app, selSetIcon, nsImage, msgSend);
+                } finally {
+                    JNI.invokePPV(nsImage, selRelease, msgSend);
+                }
 
                 applied = true;
                 LOGGER.info("Replaced macOS Dock icon with ImagineFun logo");
@@ -148,7 +149,7 @@ public final class DockIconHandler {
             long app = JNI.invokePPP(nsAppClass, selSharedApp, msgSend);
 
             long selSetIcon = ObjCRuntime.sel_registerName("setApplicationIconImage:");
-            JNI.invokePPPV(app, selSetIcon, savedMacIcon, msgSend);
+            JNI.invokePPPV(app, selSetIcon, 0L, msgSend);
 
             applied = false;
             LOGGER.info("Restored original macOS Dock icon");
