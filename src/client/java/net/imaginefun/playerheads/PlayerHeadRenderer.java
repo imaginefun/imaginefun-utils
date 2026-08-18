@@ -4,21 +4,16 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.joml.Matrix4f;
-
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 
 public class PlayerHeadRenderer {
@@ -31,15 +26,18 @@ public class PlayerHeadRenderer {
     private static final int CONTROL_X = 63;
     private static final int CONTROL_Y = 1;
 
+    private static final float HEAD_SCALE = 1.1875F;
+    private static final float FACE_CENTER_Y = -0.25F;
+    private static final float FACE_Z = -0.2506F;
+
     private static final String NEW_NAMESPACE = "processed_images";
     private static final Map<Identifier, Identifier> processedTextures = new HashMap<>();
     
     public static boolean render(
         Identifier skinTexture,
         PoseStack matrixStack,
-        Direction direction,
-        int light,
-        float yaw
+        SubmitNodeCollector collector,
+        int light
     ) {
         try {
             if (net.irisshaders.iris.api.v0.IrisApi.getInstance().isRenderingShadowPass()) {
@@ -75,7 +73,7 @@ public class PlayerHeadRenderer {
         int controlB = (controlPixel >> 0) & 0xFF;
         int controlA = (controlPixel >> 24) & 0xFF;
 
-        renderCustomSkull(direction, light, yaw, matrixStack, skinTexture,
+        renderCustomSkull(collector, light, matrixStack, skinTexture,
             image,
             controlA,
             controlR,
@@ -126,18 +124,9 @@ public class PlayerHeadRenderer {
         return newId;
     }
 
-    /**
-     * Renders a custom skull with the given texture and scale.
-     * 
-     * @param skullBlockEntityRenderState The render state for the skull block entity
-     * @param matrixStack The matrix stack for transformations
-     * @param skinTexture The texture identifier for the skin
-     * @param scale The scale factor for the skull (based on alpha channel of marker pixel)
-     */
     public static void renderCustomSkull(
-        Direction direction,
+        SubmitNodeCollector collector,
         int light,
-        float yaw,
         PoseStack matrixStack,
         Identifier skinTexture,
         NativeImage image,
@@ -146,21 +135,10 @@ public class PlayerHeadRenderer {
         int controlG,
         int controlB
     ) {
-        matrixStack.pushPose();
-
-        if (direction == null) {
-            matrixStack.translate(0.5F, 0.0F, 0.5F);
-        } else {
-            matrixStack.translate(0.5F - direction.getStepX() * 0.25F, 0.25F, 0.5F - direction.getStepZ() * 0.25F);
-        }
-		matrixStack.scale(-1.1875F, -1.1875F, 1.1875F);
-        matrixStack.mulPose(Axis.YP.rotationDegrees(yaw));
-        matrixStack.translate(0.0F, -0.211F, -0.211F);
-
         int overlay = OverlayTexture.NO_OVERLAY;
-        
-        float scaleX = 0;
-        float scaleY = 0;
+
+        float scaleX;
+        float scaleY;
 
         if(controlB != 0) {
             scaleX = (float)controlA / 64.0f;
@@ -170,54 +148,44 @@ public class PlayerHeadRenderer {
             scaleY = (float)controlG / 16.0F - 0.0625F;
         }
 
-        Identifier actualIdentifier = null;
-        if(controlB != 0) {
-            actualIdentifier = getNewImage(skinTexture, image);
-        } else {
-            actualIdentifier = skinTexture;
-        }
+        Identifier actualIdentifier = controlB != 0 ? getNewImage(skinTexture, image) : skinTexture;
 
-        // UV coordinates - skip the leftmost pixel column (contains control data)
         float minU = 0.0F;
-        float maxU = 63.0F / 64.0F; // stop one column short
+        float maxU = 63.0F / 64.0F;
 
-        float z = 0.0f;
+        float halfWidth = scaleX * HEAD_SCALE;
+        float halfHeight = scaleY * HEAD_SCALE;
+        float bottom = FACE_CENTER_Y - halfHeight;
+        float top = FACE_CENTER_Y + halfHeight;
 
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderTypes.entityCutoutNoCull(actualIdentifier));
+        collector.submitCustomGeometry(
+            matrixStack,
+            RenderTypes.entityCutout(actualIdentifier),
+            (pose, vertexConsumer) -> {
+                vertex(vertexConsumer, pose, -halfWidth, bottom, minU, 0, light, overlay);
+                vertex(vertexConsumer, pose, halfWidth, bottom, maxU, 0, light, overlay);
+                vertex(vertexConsumer, pose, halfWidth, top, maxU, 1, light, overlay);
+                vertex(vertexConsumer, pose, -halfWidth, top, minU, 1, light, overlay);
+            }
+        );
+    }
 
-        Matrix4f matrix4f = matrixStack.last().pose();
-        Pose pose = matrixStack.last();
-
-        vertexConsumer.addVertex(matrix4f, -scaleX, -scaleY, z)
+    private static void vertex(
+        VertexConsumer vertexConsumer,
+        PoseStack.Pose pose,
+        float x,
+        float y,
+        float u,
+        float v,
+        int light,
+        int overlay
+    ) {
+        vertexConsumer.addVertex(pose, x, y, FACE_Z)
             .setColor(255, 255, 255, 255)
-            .setUv(minU, 0)
+            .setUv(u, v)
             .setOverlay(overlay)
             .setLight(light)
             .setNormal(pose, 0, 0, -1);
-        
-        vertexConsumer.addVertex(matrix4f, scaleX, -scaleY, z)
-            .setColor(255, 255, 255, 255)
-            .setUv(maxU, 0)
-            .setOverlay(overlay)
-            .setLight(light)
-            .setNormal(pose, 0, 0, -1);
-        
-        vertexConsumer.addVertex(matrix4f, scaleX, scaleY, z)
-            .setColor(255, 255, 255, 255)
-            .setUv(maxU, 1)
-            .setOverlay(overlay)
-            .setLight(light)
-            .setNormal(pose, 0, 0, -1);
-        
-        vertexConsumer.addVertex(matrix4f, -scaleX, scaleY, z)
-            .setColor(255, 255, 255, 255)
-            .setUv(minU, 1)
-            .setOverlay(overlay)
-            .setLight(light)
-            .setNormal(pose, 0, 0, -1);
-
-        matrixStack.popPose();
     }
 
     private static NativeImage getTextureImageViaReflection(AbstractTexture texture) {

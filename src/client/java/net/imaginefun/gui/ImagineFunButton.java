@@ -2,7 +2,7 @@ package net.imaginefun.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -25,7 +25,7 @@ public class ImagineFunButton extends Button {
     }
 
     @Override
-    protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.alpha <= 0.0f) {
             return;
         }
@@ -51,7 +51,7 @@ public class ImagineFunButton extends Button {
             float gradientPos = (currentX - startX + charWidth / 2.0f) / textWidth;
             int color = interpolateColor(COLOR_FROM, COLOR_TO, gradientPos);
 
-            graphics.drawString(font, charStr, (int) currentX, (int) startY, color, true);
+            graphics.text(font, charStr, (int) currentX, (int) startY, color, true);
 
             currentX += charWidth;
         }

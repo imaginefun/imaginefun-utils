@@ -1,7 +1,7 @@
 package net.imaginefun.command;
 
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.imaginefun.ImagineFunUtils;
@@ -16,7 +16,7 @@ public final class WhoamiCommand {
 
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(ClientCommandManager.literal("whoami").executes(context -> execute(context.getSource()))));
+            dispatcher.register(ClientCommands.literal("whoami").executes(context -> execute(context.getSource()))));
     }
 
     private static int execute(FabricClientCommandSource source) {

@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 
-import net.minecraft.core.Direction;
 
 @Mixin(SkullBlockRenderer.class)
 public abstract class SkullBlockRendererMixin {
@@ -37,14 +36,12 @@ public abstract class SkullBlockRendererMixin {
     }
     
     @Inject(
-        method = "submitSkull(Lnet/minecraft/core/Direction;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/model/object/skull/SkullModelBase;Lnet/minecraft/client/renderer/rendertype/RenderType;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
+        method = "submitSkull(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/model/object/skull/SkullModelBase;Lnet/minecraft/client/renderer/rendertype/RenderType;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
         at = @At("HEAD"),
         cancellable = true
     )
     private static void onStaticRender(
-        Direction facing,
-        float yaw,
-        float poweredTicks,
+        float animationProgress,
         PoseStack matrices,
         SubmitNodeCollector queue,
         int light,
@@ -72,9 +69,8 @@ public abstract class SkullBlockRendererMixin {
         boolean success = PlayerHeadRenderer.render(
             texture,
             matrices,
-            facing,
-            light,
-            yaw
+            queue,
+            light
         );
 
         if (success) {

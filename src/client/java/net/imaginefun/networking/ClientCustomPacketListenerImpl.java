@@ -21,7 +21,7 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
 
     @Override
     public void handleGameTestAddMarker(GameTestAddMarkerPayload gameTestAddMarkerPayload, ClientPlayNetworking.Context context) {
-        ((GameTestBlockHighlightRendererExtension) Minecraft.getInstance().levelRenderer.gameTestBlockHighlightRenderer).imaginefunutils$highlightPos(
+        ((GameTestBlockHighlightRendererExtension) Minecraft.getInstance().levelExtractor.gameTestBlockHighlightRenderer).imaginefunutils$highlightPos(
                 gameTestAddMarkerPayload.pos(),
                 gameTestAddMarkerPayload.color(),
                 gameTestAddMarkerPayload.text(),
