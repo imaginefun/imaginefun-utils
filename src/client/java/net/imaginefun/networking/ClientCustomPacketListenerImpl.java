@@ -8,6 +8,7 @@ import net.imaginefun.captions.ClosedCaptions;
 import net.imaginefun.extensions.GameTestBlockHighlightRendererExtension;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
+import net.imaginefun.timeline.RideTimeline;
 import net.minecraft.client.Minecraft;
 
 public class ClientCustomPacketListenerImpl implements ClientCustomPacketListener {
@@ -18,6 +19,9 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
         ClientPlayNetworking.registerGlobalReceiver(ApiSessionPayload.TYPE, this::handleApiSession);
         ClientPlayNetworking.registerGlobalReceiver(RideStatusPayload.TYPE, this::handleRideStatus);
         ClientPlayNetworking.registerGlobalReceiver(ServerInfoPayload.TYPE, this::handleServerInfo);
+        ClientPlayNetworking.registerGlobalReceiver(RideTimelinePayload.TYPE, this::handleRideTimeline);
+        ClientPlayNetworking.registerGlobalReceiver(RideTimelineStatePayload.TYPE, this::handleRideTimelineState);
+        ClientPlayNetworking.registerGlobalReceiver(RideTimelineClosePayload.TYPE, this::handleRideTimelineClose);
         ClientPlayNetworking.registerGlobalReceiver(ClosedCaptionPayload.TYPE, this::handleClosedCaption);
     }
 
@@ -55,6 +59,21 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
     public void handleServerInfo(ServerInfoPayload serverInfoPayload, ClientPlayNetworking.Context context) {
         ServerSession.update(serverInfoPayload.serverId(), serverInfoPayload.network(), serverInfoPayload.protocolVersion());
         ImagineFunClientEvents.SERVER_INFO.invoker().onServerInfo(serverInfoPayload);
+    }
+
+    @Override
+    public void handleRideTimeline(RideTimelinePayload rideTimelinePayload, ClientPlayNetworking.Context context) {
+        RideTimeline.open(rideTimelinePayload);
+    }
+
+    @Override
+    public void handleRideTimelineState(RideTimelineStatePayload rideTimelineStatePayload, ClientPlayNetworking.Context context) {
+        RideTimeline.update(rideTimelineStatePayload);
+    }
+
+    @Override
+    public void handleRideTimelineClose(RideTimelineClosePayload rideTimelineClosePayload, ClientPlayNetworking.Context context) {
+        RideTimeline.close(rideTimelineClosePayload.rideId());
     }
 
     @Override

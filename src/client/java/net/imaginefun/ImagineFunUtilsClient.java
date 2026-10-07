@@ -13,6 +13,8 @@ import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.servers.ServerListPopulator;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
+import net.imaginefun.timeline.RideTimeline;
+import net.imaginefun.timeline.RideTimelineKeys;
 
 public class ImagineFunUtilsClient implements ClientModInitializer {
 
@@ -23,6 +25,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
         clientCustomPacketListener = new ClientCustomPacketListenerImpl();
 		ServerListPopulator.populate();
 		WhoamiCommand.register();
+		RideTimelineKeys.register();
 		ClosedCaptions.register();
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
@@ -36,6 +39,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ApiSession.clear();
 			ServerSession.clear();
+			RideTimeline.clear();
 			ClosedCaptions.clear();
 			ForcedLookSmoother.reset();
 		});

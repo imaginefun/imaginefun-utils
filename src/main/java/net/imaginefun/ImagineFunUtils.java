@@ -11,6 +11,10 @@ import net.imaginefun.networking.GameTestAddMarkerPayload;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.networking.PlayerForceLookPayload;
 import net.imaginefun.networking.RideStatusPayload;
+import net.imaginefun.networking.RideTimelineClosePayload;
+import net.imaginefun.networking.RideTimelineControlPayload;
+import net.imaginefun.networking.RideTimelinePayload;
+import net.imaginefun.networking.RideTimelineStatePayload;
 import net.imaginefun.networking.ServerInfoPayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -29,8 +33,12 @@ public class ImagineFunUtils implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ApiSessionPayload.TYPE, ApiSessionPayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(RideStatusPayload.TYPE, RideStatusPayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ServerInfoPayload.TYPE, ServerInfoPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(RideTimelinePayload.TYPE, RideTimelinePayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(RideTimelineStatePayload.TYPE, RideTimelineStatePayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(RideTimelineClosePayload.TYPE, RideTimelineClosePayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ClosedCaptionPayload.TYPE, ClosedCaptionPayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(RideTimelineControlPayload.TYPE, RideTimelineControlPayload.STREAM_CODEC);
 
 		FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(mod ->
             ResourceLoader.registerBuiltinPack(
