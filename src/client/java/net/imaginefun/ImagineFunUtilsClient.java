@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.imaginefun.camera.ForcedLookSmoother;
 import net.imaginefun.command.WhoamiCommand;
 import net.imaginefun.networking.ClientCustomPacketListener;
 import net.imaginefun.networking.ClientCustomPacketListenerImpl;
@@ -33,6 +34,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ApiSession.clear();
 			ServerSession.clear();
+			ForcedLookSmoother.reset();
 		});
 	}
 

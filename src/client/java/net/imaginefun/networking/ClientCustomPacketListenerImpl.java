@@ -3,11 +3,11 @@ package net.imaginefun.networking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.imaginefun.ImagineFunUtils;
 import net.imaginefun.api.ImagineFunClientEvents;
+import net.imaginefun.camera.ForcedLookSmoother;
 import net.imaginefun.extensions.GameTestBlockHighlightRendererExtension;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Player;
 
 public class ClientCustomPacketListenerImpl implements ClientCustomPacketListener {
 
@@ -31,16 +31,7 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
 
     @Override
     public void handlePlayerForceLook(PlayerForceLookPayload playerForceLookPayload, ClientPlayNetworking.Context context) {
-        Player player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        float deltaYaw = playerForceLookPayload.deltaYaw();
-        float deltaPitch = playerForceLookPayload.deltaPitch();
-
-        player.yRotO = player.getYRot();
-        player.xRotO = player.getXRot();
-        player.setYRot(player.getYRot() + deltaYaw);
-        player.setXRot(player.getXRot() + deltaPitch);
+        ForcedLookSmoother.onForcedLook(playerForceLookPayload.deltaYaw(), playerForceLookPayload.deltaPitch());
     }
 
     @Override
