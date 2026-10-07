@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.imaginefun.ImagineFunUtils;
 import net.imaginefun.api.ImagineFunClientEvents;
 import net.imaginefun.camera.ForcedLookSmoother;
+import net.imaginefun.captions.ClosedCaptions;
 import net.imaginefun.extensions.GameTestBlockHighlightRendererExtension;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
@@ -17,6 +18,7 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
         ClientPlayNetworking.registerGlobalReceiver(ApiSessionPayload.TYPE, this::handleApiSession);
         ClientPlayNetworking.registerGlobalReceiver(RideStatusPayload.TYPE, this::handleRideStatus);
         ClientPlayNetworking.registerGlobalReceiver(ServerInfoPayload.TYPE, this::handleServerInfo);
+        ClientPlayNetworking.registerGlobalReceiver(ClosedCaptionPayload.TYPE, this::handleClosedCaption);
     }
 
     @Override
@@ -53,5 +55,10 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
     public void handleServerInfo(ServerInfoPayload serverInfoPayload, ClientPlayNetworking.Context context) {
         ServerSession.update(serverInfoPayload.serverId(), serverInfoPayload.network(), serverInfoPayload.protocolVersion());
         ImagineFunClientEvents.SERVER_INFO.invoker().onServerInfo(serverInfoPayload);
+    }
+
+    @Override
+    public void handleClosedCaption(ClosedCaptionPayload closedCaptionPayload, ClientPlayNetworking.Context context) {
+        ClosedCaptions.show(closedCaptionPayload);
     }
 }

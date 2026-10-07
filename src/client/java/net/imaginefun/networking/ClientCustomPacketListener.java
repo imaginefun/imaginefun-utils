@@ -13,4 +13,6 @@ public interface ClientCustomPacketListener {
     void handleRideStatus(RideStatusPayload rideStatusPayload, ClientPlayNetworking.Context context);
 
     void handleServerInfo(ServerInfoPayload serverInfoPayload, ClientPlayNetworking.Context context);
+
+    void handleClosedCaption(ClosedCaptionPayload closedCaptionPayload, ClientPlayNetworking.Context context);
 }

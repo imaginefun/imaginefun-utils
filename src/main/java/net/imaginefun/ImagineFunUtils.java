@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.imaginefun.networking.ApiSessionPayload;
+import net.imaginefun.networking.ClosedCaptionPayload;
 import net.imaginefun.networking.GameTestAddMarkerPayload;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.networking.PlayerForceLookPayload;
@@ -28,6 +29,7 @@ public class ImagineFunUtils implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ApiSessionPayload.TYPE, ApiSessionPayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(RideStatusPayload.TYPE, RideStatusPayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ServerInfoPayload.TYPE, ServerInfoPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ClosedCaptionPayload.TYPE, ClosedCaptionPayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 
 		FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(mod ->
