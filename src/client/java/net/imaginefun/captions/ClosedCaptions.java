@@ -42,11 +42,6 @@ public final class ClosedCaptions {
             return;
         }
 
-        if (!minecraft.options.showSubtitles().get()) {
-            minecraft.gui.hud.getChat().addClientSystemMessage(text);
-            return;
-        }
-
         Vec3 source = payload.positional() ? new Vec3(payload.x(), payload.y(), payload.z()) : null;
         int readingMs = Math.max(MIN_DURATION_MS, text.getString().length() * READING_MS_PER_CHARACTER);
         int durationMs = Math.min(MAX_DURATION_MS, Math.max(payload.durationMs(), readingMs));

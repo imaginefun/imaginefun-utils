@@ -12,6 +12,7 @@
       "RenderTypeAccessor",
       "ScreenAccessor",
       "SkullBlockRendererMixin",
+      "SubtitleOverlayMixin",
       "TextureBindingAccessor",
       "TitleScreenMixin"
     ],
