@@ -11,8 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -27,15 +30,15 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.imaginefun.ImagineFunUtils;
 import net.imaginefun.api.ImagineFunApi;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
 public final class PolaroidTextureCache {
 
     private static final String IMAGE_PATH = "/v1/photopass/worldshot/";
-    private static final int TEXTURE_WIDTH = 128;
-    private static final int MAX_TEXTURES = 64;
+    private static final int MAX_TEXTURE_WIDTH = 520;
+    private static final int MIP_LEVELS = 4;
+    private static final int MAX_TEXTURES = 32;
     private static final long IDLE_EXPIRY_MS = 30_000L;
     private static final long RETRY_INTERVAL_MS = 5L * 60L * 1000L;
     private static final long SWEEP_INTERVAL_MS = 1_000L;
@@ -43,6 +46,7 @@ public final class PolaroidTextureCache {
     private static final float TARGET_ASPECT = 13.0F / 12.0F;
 
     private static final Map<String, Entry> ENTRIES = new ConcurrentHashMap<>();
+    private static final Set<String> VALIDATED_THIS_SESSION = ConcurrentHashMap.newKeySet();
     private static long lastSweep;
 
     private static final ExecutorService IO_EXECUTOR = Executors.newSingleThreadExecutor(
@@ -86,6 +90,7 @@ public final class PolaroidTextureCache {
             }
         });
         ENTRIES.clear();
+        VALIDATED_THIS_SESSION.clear();
     }
 
     private static Entry startLoad(String imageId) {
@@ -97,7 +102,7 @@ public final class PolaroidTextureCache {
 
         fetch(imageId, cacheFile)
             .thenApplyAsync(PolaroidTextureCache::decode, IO_EXECUTOR)
-            .thenAccept(image -> Minecraft.getInstance().execute(() -> register(imageId, entry, textureId, image)))
+            .thenAccept(mipLevels -> Minecraft.getInstance().execute(() -> register(imageId, entry, textureId, mipLevels)))
             .exceptionally(throwable -> {
                 entry.retryAt = Util.getMillis() + RETRY_INTERVAL_MS;
                 ImagineFunUtils.LOGGER.warn("Failed to load polaroid image {}, retrying in {}s",
@@ -108,7 +113,7 @@ public final class PolaroidTextureCache {
         return entry;
     }
 
-    private static NativeImage decode(byte[] bytes) {
+    private static NativeImage[] decode(byte[] bytes) {
         BufferedImage decoded;
         try {
             decoded = ImageIO.read(new ByteArrayInputStream(bytes));
@@ -118,11 +123,38 @@ public final class PolaroidTextureCache {
         if (decoded == null) {
             throw new IllegalStateException("Unsupported polaroid image format");
         }
+        return buildMipChain(downscale(decoded));
+    }
 
-        BufferedImage scaled = downscale(decoded);
-        int width = scaled.getWidth();
-        int height = scaled.getHeight();
-        int[] argb = scaled.getRGB(0, 0, width, height, null, 0, width);
+    private static BufferedImage downscale(BufferedImage source) {
+        if (source.getWidth() <= MAX_TEXTURE_WIDTH) {
+            return source;
+        }
+        int height = Math.max(1, Math.round(source.getHeight() * (float) MAX_TEXTURE_WIDTH / source.getWidth()));
+        BufferedImage scaled = new BufferedImage(MAX_TEXTURE_WIDTH, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = scaled.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.drawImage(source, 0, 0, MAX_TEXTURE_WIDTH, height, null);
+        graphics.dispose();
+        return scaled;
+    }
+
+    private static NativeImage[] buildMipChain(BufferedImage source) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int[] pixels = source.getRGB(0, 0, width, height, null, 0, width);
+        List<NativeImage> levels = new ArrayList<>();
+        levels.add(toNativeImage(pixels, width, height));
+        while (levels.size() < MIP_LEVELS && width > 1 && height > 1) {
+            pixels = halve(pixels, width, height);
+            width >>= 1;
+            height >>= 1;
+            levels.add(toNativeImage(pixels, width, height));
+        }
+        return levels.toArray(NativeImage[]::new);
+    }
+
+    private static NativeImage toNativeImage(int[] argb, int width, int height) {
         NativeImage image = new NativeImage(width, height, false);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -132,24 +164,46 @@ public final class PolaroidTextureCache {
         return image;
     }
 
-    private static BufferedImage downscale(BufferedImage source) {
-        if (source.getWidth() <= TEXTURE_WIDTH) {
-            return source;
+    private static int[] halve(int[] pixels, int width, int height) {
+        int halfWidth = width >> 1;
+        int halfHeight = height >> 1;
+        int[] result = new int[halfWidth * halfHeight];
+        for (int y = 0; y < halfHeight; y++) {
+            int y0 = y * 2;
+            int y1 = Math.min(y0 + 1, height - 1);
+            for (int x = 0; x < halfWidth; x++) {
+                int x0 = x * 2;
+                int x1 = Math.min(x0 + 1, width - 1);
+                result[y * halfWidth + x] = average(
+                    pixels[y0 * width + x0], pixels[y0 * width + x1],
+                    pixels[y1 * width + x0], pixels[y1 * width + x1]);
+            }
         }
-        int height = Math.max(1, Math.round(source.getHeight() * (float) TEXTURE_WIDTH / source.getWidth()));
-        BufferedImage scaled = new BufferedImage(TEXTURE_WIDTH, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = scaled.createGraphics();
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics.drawImage(source, 0, 0, TEXTURE_WIDTH, height, null);
-        graphics.dispose();
-        return scaled;
+        return result;
+    }
+
+    private static int average(int a, int b, int c, int d) {
+        int red = (((a >> 16) & 0xFF) + ((b >> 16) & 0xFF) + ((c >> 16) & 0xFF) + ((d >> 16) & 0xFF)) >> 2;
+        int green = (((a >> 8) & 0xFF) + ((b >> 8) & 0xFF) + ((c >> 8) & 0xFF) + ((d >> 8) & 0xFF)) >> 2;
+        int blue = ((a & 0xFF) + (b & 0xFF) + (c & 0xFF) + (d & 0xFF)) >> 2;
+        return 0xFF000000 | red << 16 | green << 8 | blue;
     }
 
     private static CompletableFuture<byte[]> fetch(String imageId, Path cacheFile) {
         return CompletableFuture.supplyAsync(() -> readCached(cacheFile), IO_EXECUTOR)
-            .thenCompose(cached -> cached != null
-                ? CompletableFuture.completedFuture(cached)
-                : download(imageId, cacheFile));
+            .thenCompose(cached -> {
+                if (cached != null && VALIDATED_THIS_SESSION.contains(imageId)) {
+                    return CompletableFuture.completedFuture(cached);
+                }
+                CompletableFuture<byte[]> downloaded = download(imageId, cacheFile);
+                if (cached == null) {
+                    return downloaded;
+                }
+                return downloaded.exceptionally(throwable -> {
+                    ImagineFunUtils.LOGGER.warn("Using cached polaroid image {} after refresh failed", imageId, throwable);
+                    return cached;
+                });
+            });
     }
 
     private static CompletableFuture<byte[]> download(String imageId, Path cacheFile) {
@@ -161,18 +215,23 @@ public final class PolaroidTextureCache {
                 }
                 byte[] body = response.body();
                 writeCached(cacheFile, body);
+                VALIDATED_THIS_SESSION.add(imageId);
                 return body;
             }, IO_EXECUTOR);
     }
 
-    private static void register(String imageId, Entry entry, Identifier textureId, NativeImage image) {
+    private static void register(String imageId, Entry entry, Identifier textureId, NativeImage[] mipLevels) {
         if (ENTRIES.get(imageId) != entry) {
-            image.close();
+            for (NativeImage level : mipLevels) {
+                level.close();
+            }
             return;
         }
+        int width = mipLevels[0].getWidth();
+        int height = mipLevels[0].getHeight();
         Minecraft.getInstance().getTextureManager()
-            .register(textureId, new DynamicTexture(textureId::toString, image));
-        entry.image = centerCrop(textureId, image.getWidth(), image.getHeight());
+            .register(textureId, new PolaroidTexture(textureId::toString, mipLevels));
+        entry.image = centerCrop(textureId, width, height);
         evictLeastRecentlyUsed();
     }
 

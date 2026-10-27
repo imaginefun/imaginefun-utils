@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemStack;
 
 public final class PolaroidPhotoRenderer implements SpecialModelRenderer<PolaroidPhoto> {
@@ -55,12 +55,17 @@ public final class PolaroidPhotoRenderer implements SpecialModelRenderer<Polaroi
 
         collector.submitCustomGeometry(
             poseStack,
-            RenderTypes.entityTranslucent(image.texture()),
+            RenderTypes.text(image.texture()),
             (pose, vertexConsumer) -> {
-                vertex(vertexConsumer, pose, MIN_X, MIN_Y, image.maxU(), image.maxV(), light, alpha);
-                vertex(vertexConsumer, pose, MAX_X, MIN_Y, image.minU(), image.maxV(), light, alpha);
-                vertex(vertexConsumer, pose, MAX_X, MAX_Y, image.minU(), image.minV(), light, alpha);
-                vertex(vertexConsumer, pose, MIN_X, MAX_Y, image.maxU(), image.minV(), light, alpha);
+                vertex(vertexConsumer, pose, MIN_X, MIN_Y, image.maxU(), image.maxV(), alpha);
+                vertex(vertexConsumer, pose, MIN_X, MAX_Y, image.maxU(), image.minV(), alpha);
+                vertex(vertexConsumer, pose, MAX_X, MAX_Y, image.minU(), image.minV(), alpha);
+                vertex(vertexConsumer, pose, MAX_X, MIN_Y, image.minU(), image.maxV(), alpha);
+
+                vertex(vertexConsumer, pose, MIN_X, MIN_Y, image.maxU(), image.maxV(), alpha);
+                vertex(vertexConsumer, pose, MAX_X, MIN_Y, image.minU(), image.maxV(), alpha);
+                vertex(vertexConsumer, pose, MAX_X, MAX_Y, image.minU(), image.minV(), alpha);
+                vertex(vertexConsumer, pose, MIN_X, MAX_Y, image.maxU(), image.minV(), alpha);
             }
         );
     }
@@ -78,14 +83,11 @@ public final class PolaroidPhotoRenderer implements SpecialModelRenderer<Polaroi
         float y,
         float u,
         float v,
-        int light,
         int alpha
     ) {
         vertexConsumer.addVertex(pose, x, y, DEPTH)
             .setColor(255, 255, 255, alpha)
             .setUv(u, v)
-            .setOverlay(OverlayTexture.NO_OVERLAY)
-            .setLight(light)
-            .setNormal(pose, 0.0F, 0.0F, -1.0F);
+            .setLight(LightCoordsUtil.FULL_BRIGHT);
     }
 }
