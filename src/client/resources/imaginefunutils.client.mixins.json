@@ -4,6 +4,9 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
       "GameTestBlockHighlightRendererMixin",
+      "ItemModelResolverMixin",
+      "ItemStackRenderStateAccessor",
+      "LayerRenderStateAccessor",
       "MouseHandlerMixin",
       "RenderSetupAccessor",
       "RenderTypeAccessor",

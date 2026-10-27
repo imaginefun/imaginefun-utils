@@ -10,6 +10,7 @@ import net.imaginefun.command.WhoamiCommand;
 import net.imaginefun.networking.ClientCustomPacketListener;
 import net.imaginefun.networking.ClientCustomPacketListenerImpl;
 import net.imaginefun.networking.HandshakePayload;
+import net.imaginefun.polaroid.PolaroidTextureCache;
 import net.imaginefun.servers.ServerListPopulator;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
@@ -27,6 +28,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 		WhoamiCommand.register();
 		RideTimelineKeys.register();
 		ClosedCaptions.register();
+		PolaroidTextureCache.register();
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			String version = FabricLoader.getInstance()
@@ -39,6 +41,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ApiSession.clear();
 			ServerSession.clear();
+			PolaroidTextureCache.clear();
 			RideTimeline.clear();
 			ClosedCaptions.clear();
 			ForcedLookSmoother.reset();

@@ -40,6 +40,18 @@ public final class ImagineFunApi {
     }
 
     public static CompletableFuture<HttpResponse<String>> get(String callerModId, String path) {
+        return send(callerModId, path, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public static CompletableFuture<HttpResponse<byte[]>> getBytes(String callerModId, String path) {
+        return send(callerModId, path, HttpResponse.BodyHandlers.ofByteArray());
+    }
+
+    private static <T> CompletableFuture<HttpResponse<T>> send(
+        String callerModId,
+        String path,
+        HttpResponse.BodyHandler<T> bodyHandler
+    ) {
         if (path == null || !path.startsWith("/")) {
             return CompletableFuture.failedFuture(new IllegalArgumentException("path must start with /"));
         }
@@ -59,7 +71,7 @@ public final class ImagineFunApi {
             request.header("Authorization", "Bearer " + token);
         }
 
-        return HTTP_CLIENT.sendAsync(request.build(), HttpResponse.BodyHandlers.ofString());
+        return HTTP_CLIENT.sendAsync(request.build(), bodyHandler);
     }
 
     public static CompletableFuture<SessionPlayer> getSessionPlayer(String callerModId) {
