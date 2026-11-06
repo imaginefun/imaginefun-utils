@@ -8,8 +8,11 @@ import net.imaginefun.captions.ClosedCaptions;
 import net.imaginefun.extensions.GameTestBlockHighlightRendererExtension;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
+import net.imaginefun.stats.ServerStats;
+import net.imaginefun.stats.ServerStatsScreen;
 import net.imaginefun.timeline.RideTimeline;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 
 public class ClientCustomPacketListenerImpl implements ClientCustomPacketListener {
@@ -25,6 +28,9 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
         ClientPlayNetworking.registerGlobalReceiver(RideTimelineClosePayload.TYPE, this::handleRideTimelineClose);
         ClientPlayNetworking.registerGlobalReceiver(ClosedCaptionPayload.TYPE, this::handleClosedCaption);
         ClientPlayNetworking.registerGlobalReceiver(OpenAdvancementsPayload.TYPE, this::handleOpenAdvancements);
+        ClientPlayNetworking.registerGlobalReceiver(OpenStatsPayload.TYPE, this::handleOpenStats);
+        ClientPlayNetworking.registerGlobalReceiver(ServerStatsPayload.TYPE, this::handleServerStats);
+        ClientPlayNetworking.registerGlobalReceiver(ServerStatsUpdatePayload.TYPE, this::handleServerStatsUpdate);
     }
 
     @Override
@@ -86,5 +92,23 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
     @Override
     public void handleOpenAdvancements(OpenAdvancementsPayload openAdvancementsPayload, ClientPlayNetworking.Context context) {
         context.client().gui.setScreen(new AdvancementsScreen(context.player().connection.getAdvancements()));
+    }
+
+    @Override
+    public void handleOpenStats(OpenStatsPayload openStatsPayload, ClientPlayNetworking.Context context) {
+        context.client().gui.setScreen(new StatsScreen(null, context.player().getStats()));
+    }
+
+    @Override
+    public void handleServerStats(ServerStatsPayload serverStatsPayload, ClientPlayNetworking.Context context) {
+        ServerStats.replace(serverStatsPayload);
+        if (context.client().gui.screen() instanceof ServerStatsScreen screen) {
+            screen.onSnapshotReplaced();
+        }
+    }
+
+    @Override
+    public void handleServerStatsUpdate(ServerStatsUpdatePayload serverStatsUpdatePayload, ClientPlayNetworking.Context context) {
+        ServerStats.apply(serverStatsUpdatePayload);
     }
 }

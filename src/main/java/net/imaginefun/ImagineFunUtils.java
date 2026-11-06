@@ -10,12 +10,15 @@ import net.imaginefun.networking.ClosedCaptionPayload;
 import net.imaginefun.networking.GameTestAddMarkerPayload;
 import net.imaginefun.networking.HandshakePayload;
 import net.imaginefun.networking.OpenAdvancementsPayload;
+import net.imaginefun.networking.OpenStatsPayload;
 import net.imaginefun.networking.PlayerForceLookPayload;
 import net.imaginefun.networking.RideStatusPayload;
 import net.imaginefun.networking.RideTimelineClosePayload;
 import net.imaginefun.networking.RideTimelineControlPayload;
 import net.imaginefun.networking.RideTimelinePayload;
 import net.imaginefun.networking.RideTimelineStatePayload;
+import net.imaginefun.networking.ServerStatsPayload;
+import net.imaginefun.networking.ServerStatsUpdatePayload;
 import net.imaginefun.networking.ServerInfoPayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -39,6 +42,9 @@ public class ImagineFunUtils implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(RideTimelineClosePayload.TYPE, RideTimelineClosePayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ClosedCaptionPayload.TYPE, ClosedCaptionPayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenAdvancementsPayload.TYPE, OpenAdvancementsPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenStatsPayload.TYPE, OpenStatsPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ServerStatsPayload.TYPE, ServerStatsPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ServerStatsUpdatePayload.TYPE, ServerStatsUpdatePayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(RideTimelineControlPayload.TYPE, RideTimelineControlPayload.STREAM_CODEC);
 

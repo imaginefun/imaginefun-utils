@@ -24,3 +24,4 @@ accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab ma
 accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab maxY I
 accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab fade F
 accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab centered Z
+accessible field net/minecraft/client/gui/screens/achievement/StatsScreen lastScreen Lnet/minecraft/client/gui/screens/Screen;

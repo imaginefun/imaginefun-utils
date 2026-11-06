@@ -14,6 +14,7 @@ import net.imaginefun.polaroid.PolaroidTextureCache;
 import net.imaginefun.servers.ServerListPopulator;
 import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
+import net.imaginefun.stats.ServerStats;
 import net.imaginefun.timeline.RideTimeline;
 import net.imaginefun.timeline.RideTimelineKeys;
 
@@ -35,6 +36,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 				.getModContainer(ImagineFunUtils.MOD_ID)
 				.map(mod -> mod.getMetadata().getVersion().getFriendlyString())
 				.orElse("unknown");
+			ServerStats.clear();
 			ClientPlayNetworking.send(new HandshakePayload(version));
 		});
 
@@ -45,6 +47,7 @@ public class ImagineFunUtilsClient implements ClientModInitializer {
 			RideTimeline.clear();
 			ClosedCaptions.clear();
 			ForcedLookSmoother.reset();
+			ServerStats.clear();
 		});
 	}
 

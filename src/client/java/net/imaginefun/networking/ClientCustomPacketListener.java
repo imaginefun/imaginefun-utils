@@ -23,4 +23,10 @@ public interface ClientCustomPacketListener {
     void handleRideTimelineClose(RideTimelineClosePayload rideTimelineClosePayload, ClientPlayNetworking.Context context);
 
     void handleOpenAdvancements(OpenAdvancementsPayload openAdvancementsPayload, ClientPlayNetworking.Context context);
+
+    void handleOpenStats(OpenStatsPayload openStatsPayload, ClientPlayNetworking.Context context);
+
+    void handleServerStats(ServerStatsPayload serverStatsPayload, ClientPlayNetworking.Context context);
+
+    void handleServerStatsUpdate(ServerStatsUpdatePayload serverStatsUpdatePayload, ClientPlayNetworking.Context context);
 }
