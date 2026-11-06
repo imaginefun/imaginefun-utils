@@ -9,6 +9,7 @@ import net.imaginefun.networking.ApiSessionPayload;
 import net.imaginefun.networking.ClosedCaptionPayload;
 import net.imaginefun.networking.GameTestAddMarkerPayload;
 import net.imaginefun.networking.HandshakePayload;
+import net.imaginefun.networking.OpenAdvancementsPayload;
 import net.imaginefun.networking.PlayerForceLookPayload;
 import net.imaginefun.networking.RideStatusPayload;
 import net.imaginefun.networking.RideTimelineClosePayload;
@@ -37,6 +38,7 @@ public class ImagineFunUtils implements ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(RideTimelineStatePayload.TYPE, RideTimelineStatePayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(RideTimelineClosePayload.TYPE, RideTimelineClosePayload.STREAM_CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ClosedCaptionPayload.TYPE, ClosedCaptionPayload.STREAM_CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenAdvancementsPayload.TYPE, OpenAdvancementsPayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.STREAM_CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(RideTimelineControlPayload.TYPE, RideTimelineControlPayload.STREAM_CODEC);
 

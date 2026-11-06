@@ -21,4 +21,6 @@ public interface ClientCustomPacketListener {
     void handleClosedCaption(ClosedCaptionPayload closedCaptionPayload, ClientPlayNetworking.Context context);
 
     void handleRideTimelineClose(RideTimelineClosePayload rideTimelineClosePayload, ClientPlayNetworking.Context context);
+
+    void handleOpenAdvancements(OpenAdvancementsPayload openAdvancementsPayload, ClientPlayNetworking.Context context);
 }

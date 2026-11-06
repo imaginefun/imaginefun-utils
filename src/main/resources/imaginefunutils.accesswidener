@@ -7,3 +7,20 @@ accessible field net/minecraft/client/gui/Hud subtitleOverlay Lnet/minecraft/cli
 accessible field net/minecraft/client/gui/components/SubtitleOverlay subtitles Ljava/util/List;
 accessible class net/minecraft/client/gui/components/SubtitleOverlay$Subtitle
 accessible method net/minecraft/client/gui/components/SubtitleOverlay$Subtitle <init> (Lnet/minecraft/network/chat/Component;FLnet/minecraft/world/phys/Vec3;)V
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen advancements Lnet/minecraft/client/multiplayer/ClientAdvancements;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen lastScreen Lnet/minecraft/client/gui/screens/Screen;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen tabs Ljava/util/Map;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen selectedTab Lnet/minecraft/client/gui/screens/advancements/AdvancementTab;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen leftPos I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementsScreen topPos I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab root Lnet/minecraft/client/gui/screens/advancements/AdvancementWidget;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab widgets Ljava/util/Map;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab hovered Lnet/minecraft/client/gui/screens/advancements/AdvancementWidget;
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab scrollX D
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab scrollY D
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab minX I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab minY I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab maxX I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab maxY I
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab fade F
+accessible field net/minecraft/client/gui/screens/advancements/AdvancementTab centered Z

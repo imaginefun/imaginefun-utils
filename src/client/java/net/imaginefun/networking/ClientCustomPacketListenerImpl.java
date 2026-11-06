@@ -10,6 +10,7 @@ import net.imaginefun.session.ApiSession;
 import net.imaginefun.session.ServerSession;
 import net.imaginefun.timeline.RideTimeline;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 
 public class ClientCustomPacketListenerImpl implements ClientCustomPacketListener {
 
@@ -23,6 +24,7 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
         ClientPlayNetworking.registerGlobalReceiver(RideTimelineStatePayload.TYPE, this::handleRideTimelineState);
         ClientPlayNetworking.registerGlobalReceiver(RideTimelineClosePayload.TYPE, this::handleRideTimelineClose);
         ClientPlayNetworking.registerGlobalReceiver(ClosedCaptionPayload.TYPE, this::handleClosedCaption);
+        ClientPlayNetworking.registerGlobalReceiver(OpenAdvancementsPayload.TYPE, this::handleOpenAdvancements);
     }
 
     @Override
@@ -79,5 +81,10 @@ public class ClientCustomPacketListenerImpl implements ClientCustomPacketListene
     @Override
     public void handleClosedCaption(ClosedCaptionPayload closedCaptionPayload, ClientPlayNetworking.Context context) {
         ClosedCaptions.show(closedCaptionPayload);
+    }
+
+    @Override
+    public void handleOpenAdvancements(OpenAdvancementsPayload openAdvancementsPayload, ClientPlayNetworking.Context context) {
+        context.client().gui.setScreen(new AdvancementsScreen(context.player().connection.getAdvancements()));
     }
 }
